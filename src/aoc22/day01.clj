@@ -23,7 +23,12 @@
 
 (defn part2
   [f]
-  (-> f
-      read-data))
+  (->> f
+      read-data
+      (map #(apply + %))
+      sort
+      reverse
+      (take 3)
+      (apply +)))
 
 ;; The End
