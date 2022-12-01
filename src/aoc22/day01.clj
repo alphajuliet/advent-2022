@@ -1,6 +1,5 @@
 (ns aoc22.day01
   (:require [aoc22.util :as util]
-            [clojure.math :as math]
             [clojure.edn :as edn]))
 
 (def testf "data/day01-test.txt")
@@ -21,14 +20,18 @@
        (map #(apply + %))
        (apply max)))
 
+(assert (= (part1 testf) 24000))
+
 (defn part2
   [f]
   (->> f
-      read-data
-      (map #(apply + %))
-      sort
-      reverse
-      (take 3)
-      (apply +)))
+       read-data
+       (map #(apply + %))
+       sort
+       reverse
+       (take 3)
+       (apply +)))
+
+(assert (= (part2 testf) 45000))
 
 ;; The End

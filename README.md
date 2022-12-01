@@ -1,5 +1,8 @@
 # Advent of Code 2022
 
+More Advent-ures in code, again using Clojure and some preferred libraries for dealing with matrices, graphs, combinatorics, parsing, and so on. I have some grand plans about using some other languages on certain problems, or as an alternative solution, but I'm not sure I will end up doing that very much. BQN is a language of interest, for example, but I'm only going there if an array language will really get me there faster or significantly more elegantly. However, I'm no expert in BQN and I don't want to be writing, say, low-level parsing functions when I have a perfectly good Clojure parser at my fingertips.
+
+I will comment on some of the solutions as I go, but not everything like I've done before.
 
 
 ## Licence
