@@ -4,6 +4,10 @@ More Advent-ures in code, again using Clojure and some preferred libraries for d
 
 I will comment on some of the solutions as I go, but not everything like I've done before.
 
+## Commentary
+
+Days 1 and 2 are gently easing everyone into the game, but even day 2 will be testing the very casual coders to pick a data structure (or not) that captures the rules and scoring. I went with a couple of 3x3 matrices and kept it simple, possibly at the expense of some elegance. But there are no prizes for style in this challenge, it's just stars for right answers.
+
 
 ## Licence
 
