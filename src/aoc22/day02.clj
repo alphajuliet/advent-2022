@@ -9,8 +9,8 @@
 (defn read-data
   [f]
   (->> f
-      util/import-data
-      (map #(str/split % #" "))))
+       util/import-data
+       (map #(str/split % #" "))))
 
 (def codes {"A" 0 "B" 1 "C" 2
             "X" 0 "Y" 1 "Z" 2})
@@ -28,6 +28,7 @@
    [1 2 0]])
 
 (defn play-round-1
+  "Score the round from what is played"
   [[them us]]
   (let [row (get codes them)
         col (get codes us)
@@ -35,12 +36,13 @@
     (+ (m/mget result-1 row col) shape-points)))
 
 (defn play-round-2
+  "Score the round from the play that gives the desired result"
   [[them outcome]]
   (let [row (get codes them)
         col (get codes outcome)
-        play (m/mget result-2 row col)
-        shape-points (inc play)]
-    (+ (m/mget result-1 row play) shape-points)))
+        piece (m/mget result-2 row col) ; Get what piece to play
+        shape-points (inc piece)]
+    (+ (m/mget result-1 row piece) shape-points)))
 
 ;;------------------------------
 (defn part1
