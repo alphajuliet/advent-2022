@@ -16,13 +16,13 @@
             "X" 0 "Y" 1 "Z" 2})
 
 (def result-1
-  "Our result matrix for them (row) vs us (column) using order R-P-S"
+  "Our scoring as a matrix of 'them' (row) vs 'us' (column) using order R-P-S"
   [[3 6 0]
    [0 3 6]
    [6 0 3]])
 
 (def result-2
-  "Desired result matrix in terms of R-P-S"
+  "Desired selection as a matrix of R-P-S (row) vs loss-draw-win outcome (column)"
   [[2 0 1]
    [0 1 2]
    [1 2 0]])
@@ -32,15 +32,15 @@
   [[them us]]
   (let [row (get codes them)
         col (get codes us)
-        shape-points (inc col)]
+        shape-points (inc col)] ; this is just the index + 1
     (+ (m/mget result-1 row col) shape-points)))
 
 (defn play-round-2
-  "Score the round from the play that gives the desired result"
+  "Score the round from the selection that gives the desired result"
   [[them outcome]]
   (let [row (get codes them)
         col (get codes outcome)
-        piece (m/mget result-2 row col) ; Get what piece to play
+        piece (m/mget result-2 row col) ; Look up what piece to play
         shape-points (inc piece)]
     (+ (m/mget result-1 row piece) shape-points)))
 
