@@ -6,18 +6,22 @@
 
 (defn read-data
   [f]
-  (-> f
-      util/import-data))
+  (->> f
+       util/import-data))
 
 
 (defn part1
   [f]
-  (-> f 
-      read-data))
+  (->> f
+       read-data))
+
+;; (assert (= 0 (part1 testf)))
 
 (defn part2
   [f]
-  (-> f
-      read-data))
+  (->> f
+       read-data))
+
+;; (assert (= 0 (part1 testf)))
 
 ;; The End
