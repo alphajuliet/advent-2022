@@ -8,6 +8,10 @@ I will comment on some of the solutions as I go, but not everything like I've do
 
 Days 1 and 2 are gently easing everyone into the game, but even day 2 will be testing the very casual coders to pick a data structure (or not) that captures the rules and scoring. I went with a couple of 3x3 matrices and kept it simple, possibly at the expense of some elegance. But there are no prizes for style in this challenge, it's just stars for right answers.
 
+Days 3 and 4 slowly raise the bar. For both of these I used Clojure's set functions to identify common and different elements but there are a number of ways of doing it. As is often the case, wrangling the data into the right format is a significant part of the effort. Selecting that data structure is also a key decision for what comes after.
+
+And then Day 5 comes along with a step change in difficulty. For a start, the input data needs a bunch of work to get it into something useful. It's possibly overkill but I pulled out my trusty parser (`instaparse`), not because I couldn't wrangle regular expressions but because it makes it more obvious what's going on. It's also good practice to write a simple grammar because I guarantee I'm going to need it again soon. Once you have the input in a tractable form, it's a state machine exercise to step through each instruction and update the stacks. Part 2 just changes the operation. This one could perhaps be shortened some more, but it's pretty clean, so I'll leave it.
+
 
 ## Licence
 
