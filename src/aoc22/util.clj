@@ -152,6 +152,16 @@
         (cons (first s) nil)
         (cons (first s) (take-until pred (rest s)))))))
 
+(defn take-upto
+  "Returns a lazy sequence of successive items from coll up to and including
+  the first item for which `(pred item)` returns true. Returns a transducer
+  when no collection is provided."
+  [pred coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (let [x (first s)]
+       (cons x (when-not (pred x) (take-upto pred (rest s))))))))
+
 ;;--------------------------------
 ;; Misc
 

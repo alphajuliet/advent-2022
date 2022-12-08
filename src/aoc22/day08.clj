@@ -49,6 +49,25 @@
          (util/count-if true?)
          (+ perimeter))))
 
+(defn scenic-score
+  [m i j]
+  (let [x (m/mget m i j)
+        v (get-row-col m i j)]
+    (->> v
+         (util/mapmap #(< % x))
+         (map #(drop 1 %))
+         (map #(util/take-upto false? %))
+         (map count)
+         (apply *))))
+
+(defn find-most-scenic
+  [m]
+  (let [[rows cols] (m/shape m)]
+    (->> (for [i (range 1 (dec rows))
+               j (range 1 (dec cols))]
+           (scenic-score m i j))
+         (apply max))))
+
 ;;------------------------------
 (defn part1
   [f]
@@ -61,7 +80,8 @@
 (defn part2
   [f]
   (->> f
-       read-data))
+       read-data
+       find-most-scenic))
 
-;; (assert (= 0 (part2 testf)))
+(assert (= 8 (part2 testf)))
 ;; The End
