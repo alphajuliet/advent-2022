@@ -10,6 +10,7 @@
         org.clojure/math.combinatorics {:mvn/version "0.1.6"}
         org.clojure/data.priority-map {:mvn/version "1.1.0"}
         pangloss/pattern {:git/url "https://github.com/pangloss/pattern" :sha "b8ccf001c681b943b96ae5c2f07a9985b0a2bd90"}
+        rhizome/rhizome {:mvn/version "0.2.9"}
         ubergraph/ubergraph {:mvn/version "0.8.2"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {io.github.cognitect-labs/test-runner

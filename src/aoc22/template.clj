@@ -22,5 +22,5 @@
   (->> f
        read-data))
 
-;; (assert (= 0 (part1 testf)))
+;; (assert (= 0 (part2 testf)))
 ;; The End
