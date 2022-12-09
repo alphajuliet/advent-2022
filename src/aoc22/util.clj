@@ -16,6 +16,10 @@
 ;;--------------------------------
 ;; Collections
 
+(defn nested-coll?
+  [c]
+  (and (coll? c) (coll? (first c))))
+
 (defn argmax
   "Return the value x in xs that maximises (f x)."
   ;; argmax :: (a -> b) -> Coll a -> Coll B
