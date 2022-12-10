@@ -35,6 +35,25 @@
   (let [t (range 19 220 40)]
     (map #(* (inc %) (nth trace %)) t)))
 
+(defn draw-pixel
+  [cycle sprite-centre]
+  (if (<= (dec sprite-centre) (mod cycle 40) (inc sprite-centre))
+    1
+    ;;else
+    0))
+
+(defn- num->pixel
+  [n]
+  (if (zero? n) \. \#))
+
+(defn draw-image
+  [trace]
+  (->> trace
+       (map-indexed draw-pixel)
+       (map num->pixel)
+       (partition 40)
+       (map #(str/join "" %))))
+
 ;;------------------------------
 (defn part1
   [f]
@@ -49,8 +68,10 @@
 
 (defn part2
   [f]
-  (->> f
-       read-data))
+  (let [init-state [1]]
+    (->> f
+         read-data
+         (reduce execute init-state)
+         draw-image)))
 
-;; (assert (= 0 (part2 testf)))
 ;; The End
