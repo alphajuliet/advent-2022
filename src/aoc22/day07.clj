@@ -2,9 +2,7 @@
   (:require [aoc22.util :as util]
             [clojure.edn :as edn]
             [instaparse.core :as insta]
-            [meander.epsilon :as e]
-            [meander.strategy.epsilon :as r]
-            [com.rpl.specter :as sp]))
+            [clojure.string :as str]))
 
 (def testf "data/day07-test.txt")
 (def inputf "data/day07-input.txt")
@@ -17,8 +15,8 @@
 (def log-parser
   "Parse the log file"
   (insta/parser
-   "<log> := query+
-    query := request response+
+   "<log> := folder+
+    folder := request response+
 
     <request> := chdir ls
     chdir := cd+
@@ -32,19 +30,6 @@
     name := #'[a-z./]+'
     size := #'\\d+'
     newline := '\\n'"))
-
-(defn update-wd
-  "Update the working directory"
-  ;; update-wd :: Coll -> String -> Coll
-  [wd dir-name]
-  (case dir-name
-    ".." (drop-last wd)
-    "/" '()
-    (conj wd dir-name)))
-
-(defn compress-wd
-  [queries]
-  )
 
 (defn read-log
   "Parse the log file and convert strings to numbers"
