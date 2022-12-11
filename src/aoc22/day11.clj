@@ -38,7 +38,9 @@
   [rules]
   {:rules (vec rules)
    :inspected (vec (repeat (count rules) 0))
-   :worries (mapv (comp rest second) rules)})
+   :worries (mapv (comp rest second) rules)
+   :quotient 3
+   :modulo 10000})
 
 (defn destination
   "Return the destination monkey and the new worry level"
@@ -47,11 +49,14 @@
         divisor (get-in state [:rules monkey 3 1])
         if-true (get-in state [:rules monkey 3 2 1])
         if-false (get-in state [:rules monkey 3 3 1])
+        quotient (:quotient state)
+        modulo (:modulo state)
         worry' (-> (m/match [op]
                             [(["*" "old"] :seq)] (* package package)
                             [(["+" arg] :seq)] (+ package arg)
                             [(["*" arg] :seq)] (* package arg))
-                   (quot 3))]
+                   (quot quotient)
+                   (mod modulo))]
     {:dest (if (zero? (mod worry' divisor))
              if-true
              if-false)
@@ -85,6 +90,13 @@
           st
           (range n)))
 
+(defn update-params
+  [st]
+  (let [q (map #(get-in st [:rules % 3 1]) (range (count (:rules st))))]
+    (-> st
+        (assoc :quotient 1)
+        (assoc :modulo (apply * q)))))
+
 ;;------------------------------
 (defn part1
   [f]
@@ -102,7 +114,14 @@
 (defn part2
   [f]
   (->> f
-       read-data))
+    read-data
+    init-state
+    update-params
+    (run-all-rounds 10000)
+    :inspected
+    (sort >)
+    (take 2)
+    (apply *)))
 
 ;; (assert (= 0 (part2 testf)))
 ;; The End
