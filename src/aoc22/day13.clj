@@ -11,8 +11,7 @@
   (->> f
        util/import-data
        (map edn/read-string)
-       (remove nil?)
-       (partition 2)))
+       (remove nil?)))
 
 (defn compare-packets
   "Compare two packets according to the rules"
@@ -30,11 +29,22 @@
                                   x))
     :else -1))
 
+(defn add-dividers
+  [coll]
+  (conj coll [[2]] [[6]]))
+
+(defn calc-decoder-key
+  [coll]
+  (let [d1 (inc (.indexOf coll [[2]]))
+        d2 (inc (.indexOf coll [[6]]))]
+    (* d1 d2)))
+
 ;;------------------------------
 (defn part1
   [f]
   (->> f
        read-data
+       (partition 2)
        (map-indexed #(list (inc %1) (apply compare-packets %2)))
        (filter #(neg? (second %)))
        (map first)
@@ -45,7 +55,10 @@
 (defn part2
   [f]
   (->> f
-       read-data))
+       read-data
+       add-dividers
+       (sort compare-packets)
+       calc-decoder-key))
 
-;; (assert (= 0 (part2 testf)))
+(assert (= 140 (part2 testf)))
 ;; The End
