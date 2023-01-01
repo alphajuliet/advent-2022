@@ -1,8 +1,6 @@
 (ns aoc22.day07
-  (:require [aoc22.util :as util]
-            [clojure.edn :as edn]
-            [instaparse.core :as insta]
-            [clojure.string :as str]))
+  (:require [clojure.edn :as edn]
+            [instaparse.core :as insta]))
 
 (def testf "data/day07-test.txt")
 (def inputf "data/day07-input.txt")
@@ -94,12 +92,21 @@
        (filter #(<= % 100000))
        (apply +)))
 
-;; (assert (= 0 (part1 testf)))
+(assert (= 95437 (part1 testf)))
 
 (defn part2
   [f]
-  (->> f
-       read-data))
+  (let [fs (->> f
+             read-data
+             read-log
+             create-fs)
+        free-up (- 30000000 (- 70000000 (get-in fs [["/"] :dir])))]
+    (->> fs
+         vals
+         (filter :dir)
+         (map (comp first vals))
+         (filter #(>= % free-up))
+         (apply min))))
 
-;; (assert (= 0 (part2 testf)))
+(assert (= 24933642 (part2 testf)))
 ;; The End
