@@ -2,9 +2,6 @@
   (:require [aoc22.util :as util]
             [clojure.core.matrix :as m]
             [clojure.string :as str]
-            [ubergraph.core :as uber]
-            [ubergraph.alg :as alg]
-            [clojure.math :as math]
             [clojure.set :as set]))
 
 (def testf "data/day12-test.txt")
@@ -15,18 +12,14 @@
   (let []
     (->> f
         util/import-data
-        (map #(str/replace % "S" "`"))
-        (map #(str/replace % "E" "{"))
+        (map #(str/replace % "S" "a"))
+        (map #(str/replace % "E" "z"))
         (map #(str/split % #""))
         (util/mapmap #(inc (- (int (first %)) (int \a)))))))
 
-(defn safe-mget
-  "If [i j] is out of bounds then return the default value"
-  [m [i j] default]
-  (let [[r c] (m/shape m)]
-    (if (or (neg? i) (neg? j) (>= i r) (>= j c))
-      default
-      (m/mget m i j))))
+(defn legal-position?
+  [[r c] [i j]]
+  (and (nat-int? i) (nat-int? j) (< i r) (< j c)))
 
 (defn mfind
   "Find the first occurrence of val in mat"
@@ -35,71 +28,76 @@
         pos (-> mat
                 m/to-vector
                 (.indexOf val))]
-    (vector (quot pos c)
-            (mod pos c))))
+    ((juxt quot mod) pos c)))
 
 (defn neighbours
-  [[r c]]
+  [dim [i j]]
   (let [deltas [[1 0] [0 1] [-1 0] [0 -1]]]
-    (mapv #(mapv + [r c] %) deltas)))
+    (->> deltas
+         (mapv #(mapv + [i j] %))
+         (filter (partial legal-position? dim)))))
 
 (defn not-in?
   [a b]
   (vec (set/difference (set b) (set a))))
 
 (defn allowed-steps
-  "Allowed adjacent squares not in the path. Assume monotonically increasing for now"
+  "Allowed adjacent squares not in the path."
   [mat [r c] path]
   (let [x (m/mget mat r c)
-        nn (neighbours [r c])
-        vv (mapv #(vector % (safe-mget mat % 100)) nn)]
+        dim (m/shape mat)
+        nn (neighbours dim [r c])
+        vv (mapv #(vector % (apply m/mget mat %)) nn)]
     (->> vv
-         (filter #(<= 0 (- (second %) x) 1))
+         (filter #(<= (- (second %) x) 1))
          (mapv first)
          (not-in? path))))
-
-(defn goal?
-  [mat [r c]]
-  (= (m/mget mat r c) 4))
-
-(defn leaf?
-  [mat loc path]
-  (empty? (allowed-steps mat loc path)))
-
-(defn mat-val
-  [mat [r c]]
-  (m/mget mat r c))
 
 (defn children [mat loc path]
   (allowed-steps mat loc path))
 
-(defn queue [& vals]
-  (apply conj clojure.lang.PersistentQueue/EMPTY vals))
+(defn remove-previous-states
+  [new-states frontier visited]
+  (set/difference
+   (set new-states)
+   (set/union (set frontier) (set visited))))
 
-(defn search
-  "Depth-first search"
-  [mat]
-  (loop [q (queue {:loc (mfind mat 0) :path []})]
-    (when-let [{:keys [loc path]} (peek q)]
+(def max-calls 10000)
+
+(defn bfs
+  "Breadth-first search of a path from start to end in the matrix."
+  ;; https://nicmcphee.github.io/intro-to-evolutionary-computation/pages/03-clean-up-search-implementation.html
+  [start end mat]
+  (loop [frontier [start]
+         visited #{}
+         num-calls 0]
+    (let [next-node (first frontier)]
       (cond
-        (goal? mat loc) path
-        (leaf? mat loc path) (recur (pop q))
+        (= next-node end) visited
+        (= num-calls max-calls) :max-calls-reached
         :else
-        (let [new-path (concat [loc] path) ;depth-first search, otherwise `conj path loc`
-              wrap (fn [loc] {:loc loc :path new-path})]
-          (recur (->> (children mat loc new-path)
-                      (map wrap)
-                      (apply conj (pop q)))))))))
+        (recur (concat
+                (remove-previous-states (children mat next-node visited) frontier visited)
+                (rest frontier))
+               (conj visited next-node)
+               (inc num-calls))))))
+
+(defn start-end
+  [f]
+  (case f
+    :test [testf [0 0] [2 5]]
+    :input [inputf [20 0] [36 10]]))
 
 ;;------------------------------
 (defn part1
-  [f]
-  (->> f
-       read-data
-       search
-       count))
+  [target]
+  (let [[f start end] (start-end target)]
+    (->> f
+         read-data
+         (bfs start end)
+         #_count)))
 
-;; (assert (= 31 (part1 testf)))
+;; (assert (= 31 (part1 :test)))
 
 (defn part2
   [f]
