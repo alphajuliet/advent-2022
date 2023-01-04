@@ -15,6 +15,8 @@
       vec))
 
 (defn read-data
+  "Read in the data as a list of the vertices for each wall"
+  ;; read-data :: IO File -> Vector (Vector Coord)
   [f]
   (->> f
        util/import-data
@@ -23,6 +25,7 @@
 
 (defn extent
   "Find the extent of the matrix to fit the points"
+  ;; extent :: Vector (Vector Coord) -> [Coord Coord]
   [coll]
   (let [pts (->> coll
                  flatten
@@ -31,20 +34,23 @@
      (apply (juxt min max) (map second pts))]))
 
 (defn line-points
-  "Return all the points in a line from point 1 to point 2"
+  "Return all the points in a horizontal or vertical line segment from point 1 to point 2"
+  ;; line-points :: [Coord Coord] -> Vector Coord
   [[u1 v1] [u2 v2]]
   (cond
     (and (= u1 u2) (> v2 v1)) (mapv #(vector u1 %) (range v1 (inc v2)))
     (and (= u1 u2) (> v1 v2)) (mapv #(vector u1 %) (range v2 (inc v1)))
     (and (= v1 v2) (> u2 u1)) (mapv #(vector % v1) (range u1 (inc u2)))
-    (and (= v1 v2) (> u1 u2)) (mapv #(vector % v1) (range u2 (inc u1)))))
+    (and (= v1 v2) (> u1 u2)) (mapv #(vector % v1) (range u2 (inc u1)))
+    :else (assert false "Neither a horizontal nor vertical line")))
 
-(defn all-line-points
-  "All the points in a line running through the given corners"
-  [corners]
-  (let [a (drop-last 1 corners)
-        b (rest corners)]
-    (apply concat (map line-points a b))))
+(defn path-points
+  "All the points in a line running through the given list of vertices"
+  ;; all-line-points :: Vector Vector Coords -> List List Coords
+  [vertices]
+  (let [a (drop-last 1 vertices)
+        b (rest vertices)]
+    (apply concat (mapv line-points a b))))
 
 (defn zero-matrix
   "Make a matrix of integer 0"
@@ -54,41 +60,36 @@
       (m/reshape [r c])))
 
 (defn create-matrix
-  "Load up a matrix  for part 1 with all the walls. Walls are 1, sand is 2"
-  [corners [rex cex]]
-  (let [rmin (first rex)
-        rows (inc (- (second rex) rmin))
-        cols (inc (second cex))
+  "Load up a matrix with all the walls. Walls are 1, sand is 2"
+  [corners [[rmin rmax] [_ cmax]]]
+  (let [rows (inc (- rmax rmin))
+        cols (inc cmax)
         mat (zero-matrix rows cols)]
-    (reduce (fn [m [r c]]
-              (m/mset m (- r rmin) c 1))
+    (reduce (fn [m [r c]] (m/mset m (- r rmin) c 1))
             mat
-            (apply concat (map all-line-points corners)))))
+            (apply concat (map path-points corners)))))
 
 (defn extend-matrix
   "Extend the matrix for part 2"
   [mat]
   (let [[rows cols] (m/shape mat)
-        cols' (+ cols 2)
-        mat-right (zero-matrix rows 2)
-        mat-tb (zero-matrix (+ 6 rows) (+ cols 2))]
+        mat-right (zero-matrix rows 2) ; Add two more cols to provide the floor
+        mat-tb (zero-matrix (+ 250 rows) (+ cols 2))] ; Extend the matrix 'enough' on top and bottom
     (as-> mat <>
-      (m/join-along 1 <> mat-right)
-      (m/join mat-tb <> mat-tb)
-      (m/set-column <> (inc cols) 1))))
+      (m/join-along 1 <> mat-right)     ; add matrix to RHS
+      (m/join mat-tb <> mat-tb)         ; add matrix to top and bottom
+      (m/set-column <> (inc cols) 1)))) ; add the floor to the far right edge
 
 (defn safe-mget
   "Return nil if m/mget is out of bounds"
   [mat r c]
   {:pre [(seq mat)]}
   (let [[rows cols] (m/shape mat)]
-    (if (or (neg? r) (neg? c)
-            (>= r rows) (>= c cols))
+    (if (or (neg? r) (neg? c) (>= r rows) (>= c cols))
       nil
-      ;; else
       (m/mget mat r c))))
 
-(defn move-sand
+(defn drop-unit-sand
   "Drop a unit of sand until it stops or exits the sides (nil). Gravity is in the direction of increasing c"
   [mat r-offset]
   (loop [st {:m (m/mset mat (- 500 r-offset) 0 2) ; Set the initial unit of sand
@@ -116,6 +117,7 @@
                                                           (update :m #(m/mset % (inc r) (inc c) 2))
                                                           (update :r inc)
                                                           (update :c inc))
+                ;; See if the sand input is backed up
                 (= 2 (safe-mget m (- 500 r-offset) 0)) nil
                 ;; else do nothing
                 :else st)]
@@ -125,45 +127,44 @@
         (if (= (:m st) (:m st'))
           (:m st')
           ;; else
-          (recur st'))))
-    ))
+          (recur st'))))))
 
-(defn fill-with-sand
+(defn fill-with-sand-part1
+  "Fill with sand"
   [corners]
   (let [ex (extent corners)
         r-offset (first (first ex))]
     (loop [mat (create-matrix corners ex)
            count 0]
-      (let [mat' (move-sand mat r-offset)]
+      (let [mat' (drop-unit-sand mat r-offset)]
         (if (nil? mat')
           count
           (recur mat' (inc count)))))))
 
-(defn fill-sand [matrix r-offset]
+(defn fill-sand
+  "Drop units of sand until it's full"
+  [matrix r-offset]
   (loop [mat matrix
-         count 0]
-    (let [mat' (move-sand mat r-offset)]
-      (if (nil? mat')
-        count
-        (recur mat' (inc count))))))
+         counter 0]
+    (if-let [mat' (drop-unit-sand mat r-offset)]
+      (recur mat' (inc counter))
+      counter)))
 
-(defn fill-with-sand-2
+(defn fill-with-sand-part2
   [corners]
-  (let [ex (extent corners)
+  (let [[[rmin _] [_ _] :as ex] (extent corners)
         m0 (create-matrix corners ex)
         m1 (extend-matrix m0)
         [rows _] (m/shape m0)
-        rmin (first (first ex))
-        r-offset (- rmin (+ rows 6))]
+        r-offset (- rmin (+ rows 250))] ;; because we extended by this number of rows
     (fill-sand m1 r-offset)))
 
 ;;------------------------------
-;;
 (defn part1
   [f]
   (->> f
        read-data
-       fill-with-sand))
+       fill-with-sand-part1))
 
 (assert (= 24 (part1 testf)))
 
@@ -171,8 +172,8 @@
   [f]
   (->> f
        read-data
-       fill-with-sand-2
+       fill-with-sand-part2
        inc))
 
-;; (assert (= 93 (part2 testf)))
+(assert (= 93 (part2 testf)))
 ;; The End
