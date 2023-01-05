@@ -1,12 +1,10 @@
 (ns aoc22.day15
-  (:require
-   [clojure.edn :as edn]
-   [instaparse.core :as insta]
-   [aoc22.util :as util]))
+  (:require [aoc22.util :as util]
+            [clojure.edn :as edn]
+            [instaparse.core :as insta]))
 
 (def testf "data/day15-test.txt")
 (def inputf "data/day15-input.txt")
-
 
 (def parse-sensor-data
   (insta/parser
@@ -20,7 +18,7 @@
     "))
 
 (defn read-data
-  "Create two lists: sensors and beacons"
+  "Create a list of sensor-beacon pairs"
   [f]
   (->> f
        slurp
@@ -44,35 +42,52 @@
      (abs (- v y))))
 
 (defn within?
-  [[sensor beacon] point]
+  [sensor beacon point]
   (<= (distance sensor point) (distance sensor beacon)))
 
-(defn line-points
-  "All the points on a line in a grid with a given extent"
-  [[[x0 _] [x1 _]] y]
-  (for [x (range (- x0 1000000) (+ x1 1000000))]
-    [x y]))
+(defn line-overlap
+  [[sx sy :as sensor] beacon y]
+  (let [d (distance sensor beacon)
+        b (- d (abs (- sy y)))]
+    (range (- sx b) (+ sx b))))
 
-(defn inclusions
-  "Count the number of points on the line y that lie within the range of the sensors"
-  [y points]
-  (let [ext (extent (apply concat points))
-        line (line-points ext y)]
-    (for [sb points]
-      (filter #(within? sb %) line))))
+(defn line-coverage
+  [y pairs]
+  (for [[s b] pairs
+        :when (<= (abs (- y (second s))) (distance s b))]
+    (line-overlap s b y)))
+
+(defn diamond
+  "List the vertices of the bounding diamond centred on the sensor that touches the beacon"
+  [sensor beacon]
+  (let [d (distance sensor beacon)]
+    (list (mapv + sensor [d 0])
+          (mapv + sensor [0 d])
+          (mapv - sensor [d 0])
+          (mapv - sensor [0 d]))))
+
+(defn covered
+  "List all the coords covered by the bounding diamond"
+  [[xs ys :as sensor] beacon]
+  (let [d (distance sensor beacon)]
+    (for [x (range (- xs d) (inc (+ xs d)))
+          y (range (- ys d) (inc (+ ys d)))
+          :let [x0 (abs (- x xs))] ; save cpu?
+          :when (and (<= y (+ ys (- d x0)))
+                     (>= y (+ ys (- x0 d))))]
+      [x y])))
 
 ;;------------------------------
 (defn part1
-  [f row]
+  [f y]
   (->> f
        read-data
-       (inclusions row)
+       (line-coverage y)
        (apply concat)
-       distinct
-       count
-       dec))
+       set
+       count))
 
-;; (assert (= 0 (part1 testf)))
+(assert (= 26 (part1 testf 10)) "Part 1 fail on test data")
 
 (defn part2
   [f]
