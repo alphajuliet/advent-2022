@@ -66,16 +66,34 @@
           (mapv - sensor [d 0])
           (mapv - sensor [0 d]))))
 
-(defn covered
-  "List all the coords covered by the bounding diamond"
-  [[xs ys :as sensor] beacon]
-  (let [d (distance sensor beacon)]
-    (for [x (range (- xs d) (inc (+ xs d)))
-          y (range (- ys d) (inc (+ ys d)))
-          :let [x0 (abs (- x xs))] ; save cpu?
-          :when (and (<= y (+ ys (- d x0)))
-                     (>= y (+ ys (- x0 d))))]
-      [x y])))
+(defn diagonal
+  "Return all the points on the diagonal from p1 to p2"
+  [[x1 y1] [x2 y2]]
+  (let [ix (if (> x2 x1) 1 -1)
+        iy (if (> y2 y1) 1 -1)]
+    (for [i (range (inc (abs (- x1 x2))))]
+      [(+ x1 (* i ix)) (+ y1 (* i iy))])))
+
+(defn boundary-plus-one
+  "List all the coords one unit beyond the edge of the bounding diamond"
+  [[sensor beacon]]
+  (let [dia0 (diamond sensor beacon)
+        dia1 (map (partial mapv +) dia0 [[1 0] [0 1] [-1 0] [0 -1]])]
+    (map #(diagonal (first %) (second %))
+         (partition 2 1 (conj dia1 (last dia1))))))
+
+(defn get-candidates [pairs limit]
+  (->> pairs
+       (mapcat boundary-plus-one)
+       (apply concat)
+       (filter #(and (<= 0 (first %) limit) (<= 0 (second %) limit)))
+       distinct))
+
+(defn within-all?
+  [point pairs]
+  (filter (fn [[sensor beacon]]
+            (within? sensor beacon point))
+          pairs))
 
 ;;------------------------------
 (defn part1
@@ -90,9 +108,15 @@
 (assert (= 26 (part1 testf 10)) "Part 1 fail on test data")
 
 (defn part2
-  [f]
-  (->> f
-       read-data))
+  [f limit]
+  (let [pairs (read-data f)
+        candidates (get-candidates pairs limit)
+        covers (map #(within-all? % pairs) candidates)
+        idx (.indexOf covers '())]
+    (->> idx
+         (nth candidates)
+         ((juxt (comp (partial * 4000000) first) second))
+         (apply +))))
 
-;; (assert (= 0 (part2 testf)))
+(assert (= 56000011 (part2 testf 20)))
 ;; The End
