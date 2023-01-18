@@ -1,0 +1,25 @@
+# day06.ndf
+# Solution in Nial
+
+TestF := 'data/day06-test.txt';
+InputF := 'data/day06-input.txt';
+
+Take4At is op N String { take 4 (drop N String) };
+Take14At is op N String { take 14 (drop N String) }
+
+% Find the marker with Length in the string;
+GetMarker IS TR F OP Length Str {
+  Range := tell (tally Str - Length);
+  Z := EACH diverse (Range EACHLEFT F Str);
+  l find Z + Length
+}
+
+P1 is op Filename { 
+  GetMarker Take4At 4 (link getFile FileName)
+}
+
+P2 is op Filename {
+  GetMarker Take14At 14 (link getFile Filename)
+}
+
+# The End
