@@ -16,6 +16,10 @@
 ;;--------------------------------
 ;; Collections
 
+(defn coll-contains?
+  [coll elt]
+  (nat-int? (.indexOf coll elt)))
+
 (defn nested-coll?
   [c]
   (and (coll? c) (coll? (first c))))
@@ -106,6 +110,7 @@
 
 ;;--------------------------------
 ;; Binary operations
+
 (defn binv->dec
   "Convert a binary vector to decimal"
   [v]
