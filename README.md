@@ -12,6 +12,10 @@ Days 3 and 4 slowly raise the bar. For both of these I used Clojure's set functi
 
 And then Day 5 comes along with a step change in difficulty. For a start, the input data needs a bunch of work to get it into something useful. It's possibly overkill but I pulled out my trusty parser (`instaparse`), not because I couldn't wrangle regular expressions but because it makes it more obvious what's going on. It's also good practice to write a simple grammar because I guarantee I'm going to need it again soon. Once you have the input in a tractable form, it's a state machine exercise to step through each instruction and update the stacks. Part 2 just changes the operation. This one could perhaps be shortened some more, but it's pretty clean, so I'll leave it.
 
+Day 6 is easy. Day 7 is tricky. I know I need to create a tree structure, and I have a nicely parsed representation of the input data, and going from the latter to the former is eluding me in Clojure. I've hit a mental block on this one so it goes unsolved.
+
+Days 8, 9, and 10 are more straightforward. Nothing too crazy here. Day 10 is executing a little processor, something we've seen before.
+
 
 ## Licence
 
