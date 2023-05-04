@@ -1,9 +1,7 @@
 (ns aoc22.day11
-  (:require [aoc22.util :as util]
-            [instaparse.core :as insta]
+  (:require [instaparse.core :as insta]
             [clojure.edn :as edn]
-            [clojure.core.match :as m]
-            [clojure.string :as str]))
+            [clojure.core.match :as m]))
 
 (def testf "data/day11-test.txt")
 (def inputf "data/day11-input.txt")

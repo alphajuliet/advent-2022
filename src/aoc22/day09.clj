@@ -72,7 +72,7 @@
 
 (defn move-tail-0
   "Move the tail as either one point, or a vector of points"
-  [{:keys [head tail] :as st}]
+  [{:keys [head tail]}]
   ;; move-tail-0 :: State -> Coord | List Coord
   (if (>= (count tail) 3)
     (let [t' (move-1-tail head (first tail))]

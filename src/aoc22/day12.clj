@@ -9,13 +9,12 @@
 
 (defn read-data
   [f]
-  (let []
-    (->> f
+  (->> f
         util/import-data
         (map #(str/replace % "S" "a"))
         (map #(str/replace % "E" "z"))
         (map #(str/split % #""))
-        (util/mapmap #(inc (- (int (first %)) (int \a)))))))
+        (util/mapmap #(inc (- (int (first %)) (int \a))))))
 
 (defn legal-position?
   [[r c] [i j]]
@@ -24,7 +23,7 @@
 (defn mfind
   "Find the first occurrence of val in mat"
   [mat val]
-  (let [[r c] (m/shape mat)
+  (let [[_ c] (m/shape mat)
         pos (-> mat
                 m/to-vector
                 (.indexOf val))]

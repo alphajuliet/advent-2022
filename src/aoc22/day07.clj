@@ -28,8 +28,7 @@
   (->> log
        (insta/transform
         {:size #(edn/read-string %)
-         :name identity
-         })))
+         :name identity})))
 
 (defn chdir
   [cwd dir]
