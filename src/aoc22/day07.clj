@@ -3,6 +3,7 @@
             [instaparse.core :as insta]))
 
 (def testf "data/day07-test.txt")
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def inputf "data/day07-input.txt")
 
 (defn read-data

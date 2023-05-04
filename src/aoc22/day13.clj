@@ -1,6 +1,5 @@
 (ns aoc22.day13
   (:require [aoc22.util :as util]
-            [instaparse.core :as insta]
             [clojure.edn :as edn]))
 
 (def testf "data/day13-test.txt")
