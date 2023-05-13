@@ -20,7 +20,7 @@
   "Capture each rock as a list of row vectors"
   {:beam  [[1 1 1 1]]
    :plus  [[0 1 0] [1 1 1] [0 1 0]]
-   :L     [[0 0 1] [0 0 1] [1 1 1]]
+   :L     [[1 1 1] [0 0 1] [0 0 1]]
    :stick [[1] [1] [1] [1]]
    :block [[1 1] [1 1]]})
 
@@ -36,8 +36,13 @@
           :when (= 1 (m/mget shape r c))]
       [(+ r r0) (+ c c0)])))
 
-(defn enumerate-active-shape
-  "Return the coords of the active shape"
+(defn enumerate-tile
+  "Wrapper for enumerate-shape"
+  [{:keys [shape r c]}]
+  (enumerate-shape (shape shapes) r c))
+
+(defn enumerate-active-tile
+  "Return the coords of the active tile"
   [{:keys [active]}]
   (let [{:keys [shape r c]} active]
     (enumerate-shape (shape shapes) r c)))
@@ -90,8 +95,10 @@
 (defn collision?
   "Check if the active piece overlaps an existing piece, or if it's outside the bounds of the field."
   [{:keys [active field] :as state}]
-  (let [coords (enumerate-active-shape state)]
-     (not (every? #(<= 0 (second %) 6) coords))))
+  (let [coords (enumerate-active-tile state)
+        filled-coords (apply concat (map enumerate-tile (take-last 30 (:played state))))]
+    (or (some #(contains? (set coords) %) filled-coords)
+        (not (every? #(<= 0 (second %) 6) coords)))))
 
 (defn- update-active-shape
   "Update the location of the active piece"
@@ -100,7 +107,7 @@
         st' (case direction
               "<" (update-in state [:active :c] #(max 0 (dec %)))
               ">" (update-in state [:active :c] #(min 6 (inc %)))
-              "↓" (update-in state [:active :r] #(max h (dec %)))
+              "↓" (update-in state [:active :r] #(max 0 (dec %)))
               :else state)]
     (if (collision? st')
       state
@@ -123,7 +130,7 @@
         s2 (move-shape s1 "↓")]
     (if (= s1 s2)
       (-> s2
-          (update :moves inc)
+          (update :rocks inc)
           add-new-shape)
       ;;else
       (update s2 :moves inc))))
@@ -139,30 +146,30 @@
        :active nil
        :played []
        :next-shape 0
-       :moves 0}
+       :moves 0
+       :rocks 0}
       add-new-shape))
 
 (defn play-game
-  "Step through the game until the given number of moves"
+  "Step through the game until the given number of rocks have fallen"
   [limit moves]
   (-> (reduce
        (fn [st mv]
-         (if (>= (:moves st) limit)
+         (if (>= (:rocks st) limit)
            (reduced st)
             ;; else
            (game-step st mv)))
        (initial-state)
-       moves)
-      #_stack-height))
+       (cycle moves))
+      stack-height))
 
 ;;------------------------------
 (defn part1
   [f]
-  (->> f
-       read-data
-       (play-game 10)))
+  (let [moves (read-data f)]
+    (play-game 2022 moves)))
 
-;; (assert (= 0 (part1 testf)))
+;; (assert (= 3068 (part1 testf)))
 
 (defn part2
   [f]
