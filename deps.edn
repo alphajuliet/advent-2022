@@ -4,7 +4,7 @@
         dom-top/dom-top {:mvn/version "1.0.7"}
         instaparse/instaparse {:mvn/version "1.4.12"}
         meander/epsilon {:mvn/version "0.0.650"}
-        net.mikera/core.matrix {:mvn/version "0.62.0"}
+        net.mikera/core.matrix {:mvn/version "0.63.0"}
         org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/core.match {:mvn/version "1.0.0"}
         org.clojure/math.combinatorics {:mvn/version "0.1.6"}
