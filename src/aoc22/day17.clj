@@ -94,7 +94,7 @@
 
 (defn collision?
   "Check if the active piece overlaps an existing piece, or if it's outside the bounds of the field."
-  [{:keys [active field] :as state}]
+  [state]
   (let [coords (enumerate-active-tile state)
         filled-coords (apply concat (map enumerate-tile (take-last 30 (:played state))))]
     (or (some #(contains? (set coords) %) filled-coords)
@@ -103,8 +103,7 @@
 (defn- update-active-shape
   "Update the location of the active piece"
   [state direction]
-  (let [h (stack-height state)
-        st' (case direction
+  (let [st' (case direction
               "<" (update-in state [:active :c] #(max 0 (dec %)))
               ">" (update-in state [:active :c] #(min 6 (inc %)))
               "↓" (update-in state [:active :r] #(max 0 (dec %)))
@@ -122,6 +121,13 @@
       (update-active-shape direction)
       (draw-shape 1)))
 
+(defn purge-played-tiles
+  "Keep the played tile list at a reasonable size"
+  [state]
+  (if (> (count (:played state)) 30)
+    (update state :played rest)
+    state))
+
 (defn game-step
   "Increment the game state by one step, i.e. move left/right and down. 
    If nothing has happened then add the next shape."
@@ -131,6 +137,7 @@
     (if (= s1 s2)
       (-> s2
           (update :rocks inc)
+          purge-played-tiles
           add-new-shape)
       ;;else
       (update s2 :moves inc))))
@@ -169,12 +176,13 @@
   (let [moves (read-data f)]
     (play-game 2022 moves)))
 
-;; (assert (= 3068 (part1 testf)))
-
 (defn part2
   [f]
-  (->> f
-       read-data))
+  (let [moves (read-data f)]
+    (play-game 10000 moves)))
 
-;; (assert (= 0 (part2 testf)))
+(comment
+  (assert (= 3068 (part1 testf)))
+  (assert (= 1514285714288 (part2 testf))))
+
 ;; The End
