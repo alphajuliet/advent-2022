@@ -1,7 +1,7 @@
 (* day01.ml *)
 
-let testf = "day01-test.txt"
-let inputf = "day01-input.txt"
+let testf = "data/day01-test.txt"
+let inputf = "data/day01-input.txt"
 
 (** Read in all the lines from a file *)
 let read_lines file =
