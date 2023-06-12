@@ -1,12 +1,19 @@
 (* day01.ml *)
 
-let testf = "data/day01-test.txt"
-let inputf = "data/day01-input.txt"
+#use "topfind";;
+#require "Str";;
+
+
+let testf = "../data/day01-test.txt"
+let inputf = "../data/day01-input.txt"
 
 (** Read in all the lines from a file *)
 let read_lines file =
   let contents = In_channel.with_open_bin file In_channel.input_all in
-  String.split_on_char '\n' contents
+  (* String.split_on_char '\n' contents *)
+  contents
+  |> Str.split (Str.regexp "\n\n")
+  |> List.map ~f:(String.split_on_char '\n')
 
 (** Split and group an array separated on empty strings *)
 let split_by_empty_string lst =
