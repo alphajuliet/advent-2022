@@ -41,21 +41,20 @@
 
 (defn goods-produced
   "How many goods are produced after a given number of ticks"
-  [state blueprint robot nticks]
+  [state blueprint robot-type nticks]
   (if (zero? nticks)
     state
     ;; else
     (let [state' (produce-goods state)
           max-geodes (atom 0)]
-      (doseq [r (range 4)]
-        (when (create-robot? state' blueprint r)
+      (doseq [robot (range 4)]
+        (when (create-robot? state' blueprint robot)
           (let [state'' (-> state'
-                            (update-in [robots r] inc)
-                            (update :goods #(map - % (nth blueprint r))))
-                geodes-produced (goods-produced state'' blueprint robot (dec nticks))]
+                            (update-in [:robots robot] inc)
+                            (update :goods #(map - % (nth blueprint robot))))
+                geodes-produced (goods-produced state'' blueprint robot-type (dec nticks))]
             (swap! max-geodes max geodes-produced))))
       @max-geodes)))
-
 
 (defn step
   "Step forward one tick"
@@ -78,8 +77,9 @@
 ;;------------------------------
 (defn part1
   [f]
-  (->> f
-       read-data))
+  (let [blueprint (->> f read-data)
+        s0 (init-state)]
+    (goods-produced s0 blueprint 3 10)))
 
 ;; (assert (= 0 (part1 testf)))
 
