@@ -47,8 +47,7 @@ end;
 Return the allowed neighbours of a given cell
 """
 function neighbours(m, rc::Tuple{Int, Int})
-	r = rc[1]
-	c = rc[2]
+	(r, c) = rc
 	@pipe [(0, 1), (0, -1), (1, 0), (-1, 0)] |>
 		map(d -> (r, c) .+ d, _) |>
 		filter(p -> is_valid_position(m, p[1], p[2]), _) |>
@@ -83,11 +82,41 @@ function part1(fname, start, goal)
 	search(z, start, goal)
 end;
 
+# ╔═╡ 91abac6f-aee8-4563-be43-2b08ef2a38ff
+"""
+Find all the starting points in the terrain
+"""
+function start_points(m)
+	(cols, _) = size(m)
+	pts = [(rem(i-1, cols)+1, div(i-1, cols)+1) 
+			for (i, v) in enumerate(m) 
+			if (v == 0x61)]
+end;
+
+# ╔═╡ 1b623b03-03dc-4e7e-a063-4577604cb6e0
+function part2(fname, goal)
+	mat = @pipe fname |>
+		readlines |> 
+		to_heights
+	points = @pipe mat |>
+		start_points |>
+		map(start -> search(mat, start, goal), _) |>
+		filter(result -> result.status != :nopath, _) |>
+		map(pt -> pt.cost, _) |>
+		min(_...)
+end;
+
 # ╔═╡ 11b1cacf-0435-4938-9359-8714aa77a0b8
 part1(testf, test_start, test_goal).cost
 
 # ╔═╡ ffcd206b-779b-434f-a1c2-8c3071bdb7d5
 part1(inputf, input_start, input_goal).cost
+
+# ╔═╡ 7cd95d6b-b569-4d79-8647-d050d67bc393
+part2(testf, test_goal)
+
+# ╔═╡ e861bc8f-3a28-4ac3-8238-7fc3e875fd11
+part2(inputf, input_goal)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -426,7 +455,11 @@ version = "17.4.0+0"
 # ╠═e086e39a-5590-48dd-a2de-bc2785532168
 # ╠═da9181f4-1a51-4edf-8d9f-a898e9bbc555
 # ╠═4a9598f2-b9da-40ed-8813-63fd7675b233
+# ╠═91abac6f-aee8-4563-be43-2b08ef2a38ff
+# ╠═1b623b03-03dc-4e7e-a063-4577604cb6e0
 # ╠═11b1cacf-0435-4938-9359-8714aa77a0b8
 # ╠═ffcd206b-779b-434f-a1c2-8c3071bdb7d5
+# ╠═7cd95d6b-b569-4d79-8647-d050d67bc393
+# ╠═e861bc8f-3a28-4ac3-8238-7fc3e875fd11
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
