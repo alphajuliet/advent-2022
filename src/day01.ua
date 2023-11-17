@@ -5,8 +5,8 @@
 SplitOn ← ⊕□⍜▽¯∶\+.=,
 IntoGroup ← ⊜□ ≠∞. ∵(⍣parse⋅⋅∞ ⊔)
 
-TestFile ← "../data/day01-test.txt"
-InputFile ← "../data/day01-input.txt"
+TestFile ← "data/day01-test.txt"
+InputFile ← "data/day01-input.txt"
 
 Sums ← (
   &fras
