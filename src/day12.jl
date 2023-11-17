@@ -5,8 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 5e7e0448-80ed-11ee-3888-3fe07c1916c6
-using Markdown,
-	Query,
+using Query,
 	Lazy,
 	AStarSearch
 
@@ -20,38 +19,38 @@ md"""
 
 # ╔═╡ 2f093454-cad3-4e25-b2eb-5474887e97af
 """
-Convert raw strings to height data.
+Convert raw strings to a matrix of heights.
 """
 function to_heights(lines)
 	@pipe lines |>
 		replace.(_, "S" => "a") |> 
 		replace.(_, "E" => "z") |>
-		transcode.(UInt16, _) |>
+		transcode.(UInt8, _) |>
 		collect |>
 		hcat(_...)
 end;
 
 # ╔═╡ 730b878e-6919-44be-b20c-6deaf828cb99
-function is_valid_position(m, r, c)
-	dims = size(m)
+function is_valid_position(mat, r, c)
+	dims = size(mat)
 	return (r >= 1) && (c >= 1) && (r <= dims[1]) && (c <= dims[2])
-end
+end;
 
 # ╔═╡ 51c0e4bc-0825-409d-b715-3787ae04cefc
-function is_valid_transition(m, r1, c1, r2, c2)
-	m[r2, c2] <= m[r1, c1] + 1 
+function is_valid_transition(mat, r1, c1, r2, c2)
+	mat[r2, c2] <= mat[r1, c1] + 1 
 end;
 
 # ╔═╡ ed4b9e1f-0faf-42bb-98c2-3788f63d2228
 """
 Return the allowed neighbours of a given cell
 """
-function neighbours(m, rc::Tuple{Int, Int})
+function neighbours(mat, rc::Tuple{Int, Int})
 	(r, c) = rc
 	@pipe [(0, 1), (0, -1), (1, 0), (-1, 0)] |>
 		map(d -> (r, c) .+ d, _) |>
-		filter(p -> is_valid_position(m, p[1], p[2]), _) |>
-		filter(p -> is_valid_transition(m, r, c, p[1], p[2]))
+		filter(p -> is_valid_position(mat, p[1], p[2]), _) |>
+		filter(p -> is_valid_transition(mat, r, c, p[1], p[2]))
 end;
 
 # ╔═╡ 9f68f798-ef48-4e06-86f4-5fdb091bd435
@@ -78,8 +77,8 @@ end;
 
 # ╔═╡ 4a9598f2-b9da-40ed-8813-63fd7675b233
 function part1(fname, start, goal)
-	z = fname |> readlines |> to_heights
-	search(z, start, goal)
+	heights = fname |> readlines |> to_heights
+	search(heights, start, goal)
 end;
 
 # ╔═╡ 91abac6f-aee8-4563-be43-2b08ef2a38ff
@@ -95,12 +94,12 @@ end;
 
 # ╔═╡ 1b623b03-03dc-4e7e-a063-4577604cb6e0
 function part2(fname, goal)
-	mat = @pipe fname |>
+	heights = @pipe fname |>
 		readlines |> 
 		to_heights
-	points = @pipe mat |>
+	@pipe heights |>
 		start_points |>
-		map(start -> search(mat, start, goal), _) |>
+		map(start -> search(heights, start, goal), _) |>
 		filter(result -> result.status != :nopath, _) |>
 		map(pt -> pt.cost, _) |>
 		min(_...)
@@ -123,7 +122,6 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 AStarSearch = "e6cbe913-2b79-4cc5-848a-e3bbf8537828"
 Lazy = "50d2b5c4-7a5e-59d5-8109-a42b560f39c0"
-Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 Query = "1a8c2f83-1ff3-5112-b086-8aa67b057ba1"
 
@@ -138,9 +136,9 @@ Query = "~1.0.0"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.3"
+julia_version = "1.9.4"
 manifest_format = "2.0"
-project_hash = "c20a30474cfc90a7b2d240c1dbac46d001a0ab37"
+project_hash = "0d77cc4426b9ec24501c19b32aa10f048352fa82"
 
 [[deps.AStarSearch]]
 deps = ["DataStructures"]
@@ -237,12 +235,12 @@ version = "0.15.1"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.3"
+version = "0.6.4"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "7.84.0+0"
+version = "8.4.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -251,7 +249,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.10.2+0"
+version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -435,7 +433,7 @@ version = "5.8.0+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.48.0+0"
+version = "1.52.0+1"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
