@@ -181,7 +181,7 @@
   ;; import-data :: IO File -> List String
   [f]
   (->> f
-       (slurp)
+       slurp
        (str/split-lines)))
 
 ;; The End
