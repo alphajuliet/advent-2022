@@ -103,6 +103,13 @@
   ([s len ch]
    (pp/cl-format nil (str "~" len ",'" ch "d") (str s))))
 
+(defn right-pad
+  "Right pad a string to the given length with the given character."
+  ([s len]
+   (right-pad s len " "))
+  ([s len ch]
+   (str s (apply str (repeat (max 0 (- len (count s))) ch)))))
+
 (def rotate-string
   "Rotate a string."
   ;; rotate-string :: Int -> String -> String
